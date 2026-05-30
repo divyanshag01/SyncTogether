@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Room — SyncTogether</title>
+    <meta name="description" content="Watch videos together in perfect sync with SyncTogether">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/room.css">
+</head>
+<body>
+    <div class="app-shell">
+        <!-- Ambient background -->
+        <div class="ambient-bg" aria-hidden="true"></div>
+
+        <!-- ═══════════ TOP BAR ═══════════ -->
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <div class="room-info-pill">
+                    <p id="room-id" class="room-id-text"></p>
+                    <p id="host-name" class="host-name-text"></p>
+                </div>
+            </div>
+
+            <div class="top-bar-center" aria-label="Room status">
+                <span id="status-sync" class="status-pill pill-sync">
+                    <span class="pill-dot"></span>
+                    <span class="pill-text">Synced</span>
+                </span>
+                <span id="status-offset" class="status-pill pill-offset">
+                    <span class="pill-icon">⊙</span>
+                    <span class="pill-text">Offset 0s</span>
+                </span>
+                <span id="status-subtitles" class="status-pill pill-subtitles">
+                    <span class="pill-icon">♪</span>
+                    <span class="pill-text">0 Subtitle Tracks</span>
+                </span>
+                <span id="status-compatibility" class="status-pill pill-compat">
+                    <span class="pill-icon">◈</span>
+                    <span class="pill-text">Compatibility —</span>
+                </span>
+            </div>
+
+            <div class="top-bar-right">
+                <button id="share-room-link" class="btn btn-glass" aria-label="Copy room invite link">
+                    <svg class="btn-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                    </svg>
+                    Invite
+                </button>
+                <span class="btn btn-glass participant-counter" aria-label="Participant count">
+                    <svg class="btn-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    <span id="participant-count">0</span>
+                </span>
+                <button id="leave-btn" class="btn btn-danger" aria-label="Leave room">
+                    <svg class="btn-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    Leave
+                </button>
+            </div>
+        </header>
+
+        <!-- ═══════════ MAIN CONTENT ═══════════ -->
+        <main class="main-content">
+
+            <!-- ─── Video Stage ─── -->
+            <section class="video-stage-wrapper">
+                <div class="video-ambient-glow" aria-hidden="true"></div>
+                <div class="video-stage">
+                    <video id="video-player"></video>
+                    <div class="video-empty-state" aria-hidden="true">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.3">
+                            <polygon points="5 3 19 12 5 21 5 3"/>
+                        </svg>
+                        <p>Load a video to start watching</p>
+                    </div>
+
+                    <!-- Custom Player Controls Overlay -->
+                    <div id="player-controls-container" class="player-controls">
+                        <div class="player-controls-gradient" aria-hidden="true"></div>
+                        <div class="player-controls-bar">
+                            <!-- Single-row controls: Play Rew Fwd | ═══Seek═══ | Time Speed Vol FS -->
+                            <div class="player-row">
+                                <!-- Left: transport buttons -->
+                                <div class="player-group-left">
+                                    <button id="player-play-btn" class="player-btn player-btn-play" aria-label="Play or pause" title="Play / Pause">
+                                        <svg class="icon-play" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                                            <polygon points="6 3 20 12 6 21 6 3"/>
+                                        </svg>
+                                    </button>
+                                    <button id="player-rewind-btn" class="player-btn player-btn-sm" aria-label="Rewind 10 seconds" title="Rewind 10s">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M1 4v6h6"/>
+                                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                                        </svg>
+                                        <span class="player-btn-label">10</span>
+                                    </button>
+                                    <button id="player-forward-btn" class="player-btn player-btn-sm" aria-label="Forward 10 seconds" title="Forward 10s">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M23 4v6h-6"/>
+                                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                                        </svg>
+                                        <span class="player-btn-label">10</span>
+                                    </button>
+                                </div>
+
+                                <!-- Center: seek bar (takes most space) -->
+                                <div class="player-seek-wrapper">
+                                    <input id="player-seek-bar" type="range" min="0" max="100" value="0" step="0.1" class="player-seek" aria-label="Seek timeline" />
+                                </div>
+
+                                <!-- Right: time, speed, volume, fullscreen -->
+                                <div class="player-group-right">
+                                    <span id="player-time-display" class="player-time">0:00 / 0:00</span>
+
+                                    <!-- Speed control -->
+                                    <div class="player-speed-wrap">
+                                        <button id="player-speed-btn" class="player-btn player-btn-text" aria-label="Playback speed" title="Playback Speed">
+                                            1.0x
+                                        </button>
+                                        <div id="player-speed-menu" class="player-speed-menu" role="menu">
+                                            <button class="speed-option" data-speed="0.5" role="menuitem">0.5x</button>
+                                            <button class="speed-option" data-speed="0.75" role="menuitem">0.75x</button>
+                                            <button class="speed-option speed-option-active" data-speed="1" role="menuitem">1.0x</button>
+                                            <button class="speed-option" data-speed="1.25" role="menuitem">1.25x</button>
+                                            <button class="speed-option" data-speed="1.5" role="menuitem">1.5x</button>
+                                            <button class="speed-option" data-speed="1.75" role="menuitem">1.75x</button>
+                                            <button class="speed-option" data-speed="2" role="menuitem">2.0x</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Volume -->
+                                    <button id="player-volume-btn" class="player-btn player-btn-sm" aria-label="Toggle mute" title="Volume">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                                        </svg>
+                                    </button>
+                                    <input id="player-volume-slider" type="range" min="0" max="100" value="80" class="player-vol-slider" aria-label="Volume" />
+
+                                    <button id="player-fullscreen-btn" class="player-btn player-btn-sm" aria-label="Toggle fullscreen" title="Fullscreen">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="15 3 21 3 21 9"/>
+                                            <polyline points="9 21 3 21 3 15"/>
+                                            <line x1="21" y1="3" x2="14" y2="10"/>
+                                            <line x1="3" y1="21" x2="10" y2="14"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ─── Right Sidebar ─── -->
+            <aside class="sidebar">
+
+                <!-- People Panel -->
+                <section class="panel people-panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">People</h3>
+                    </div>
+                    <ol id="users-list"></ol>
+                </section>
+
+                <!-- Chat Panel -->
+                <div id="chat-container" class="panel chat-panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">Chat</h3>
+                    </div>
+                    <div id="chat-messages"></div>
+                    <div class="chat-input-row">
+                        <input id="chat-input" type="text" placeholder="Type a message...">
+                        <button id="send-chat" class="btn btn-send" aria-label="Send message">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="22" y1="2" x2="11" y2="13"/>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+            </aside>
+        </main>
+
+        <!-- ═══════════ BOTTOM UTILITY DOCK ═══════════ -->
+        <footer class="utility-dock">
+
+            <!-- Controller indicator -->
+            <div class="dock-section dock-controller">
+                <span class="controller-pill">
+                    <span class="controller-crown">👑</span>
+                    Controller: <span id="controller-name">—</span>
+                </span>
+            </div>
+
+            <!-- Media uploads -->
+            <div class="dock-section dock-media">
+                <div class="dock-item">
+                    <label class="file-label" for="video-input">
+                        <svg class="dock-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/>
+                            <line x1="7" y1="2" x2="7" y2="22"/>
+                            <line x1="17" y1="2" x2="17" y2="22"/>
+                            <line x1="2" y1="12" x2="22" y2="12"/>
+                            <line x1="2" y1="7" x2="7" y2="7"/>
+                            <line x1="2" y1="17" x2="7" y2="17"/>
+                            <line x1="17" y1="7" x2="22" y2="7"/>
+                            <line x1="17" y1="17" x2="22" y2="17"/>
+                        </svg>
+                        Load Media
+                    </label>
+                    <input type="file" id="video-input" accept="video/*" class="file-input" />
+                </div>
+                <div class="dock-item">
+                    <label class="file-label" for="subtitle-input">
+                        <svg class="dock-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                            <line x1="1" y1="14" x2="23" y2="14"/>
+                            <line x1="5" y1="18" x2="12" y2="18"/>
+                        </svg>
+                        Load Subtitle
+                    </label>
+                    <input type="file" id="subtitle-input" accept=".vtt,.srt" class="file-input" />
+                </div>
+            </div>
+
+            <!-- Subtitle track selector -->
+            <div class="dock-section dock-subtitles">
+                <select id="subtitle-track-select" class="select-styled">
+                    <option value="">Select Subtitle</option>
+                </select>
+            </div>
+
+            <!-- Offset popover — native <details> toggle, zero additional JS -->
+            <div class="dock-section dock-offset-section">
+                <details class="offset-popover">
+                    <summary class="btn btn-glass offset-trigger">
+                        <svg class="dock-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        Offset <span id="offset-current-display" class="offset-value">+0s</span>
+                    </summary>
+                    <div class="offset-popover-content">
+                        <h4 class="offset-popover-title">Sync Offset</h4>
+                        <div class="offset-direction-header">
+                            <p class="offset-popover-desc">Is your video ahead or behind the host?</p>
+                            <span class="offset-info-trigger" tabindex="0" aria-label="Offset help">
+                                <span class="offset-info-icon">ⓘ</span>
+                                <div class="offset-tooltip" role="tooltip">
+                                    <p class="offset-tooltip-q">Is your version ahead of the host or behind it?</p>
+                                    <div class="offset-tooltip-section">
+                                        <strong>Ahead</strong>
+                                        <span>Your video is further ahead than the host's timeline.</span>
+                                    </div>
+                                    <div class="offset-tooltip-section">
+                                        <strong>Behind</strong>
+                                        <span>Your video is behind the host's timeline.</span>
+                                    </div>
+                                    <p class="offset-tooltip-hint">Use this when versions contain different intros, recaps, credits, or extra scenes.</p>
+                                </div>
+                            </span>
+                        </div>
+                        <div class="offset-row">
+                            <select id="offset-direction" class="select-styled">
+                                <option value="" disabled selected>Direction</option>
+                                <option value="behind">Behind</option>
+                                <option value="ahead">Ahead</option>
+                            </select>
+                            <input id="offset-seconds" type="number" min="0" placeholder="Seconds" class="input-styled" />
+                        </div>
+                        <div class="offset-btn-group">
+                            <button id="apply-offset" class="btn btn-accent offset-apply-btn">Apply Offset</button>
+                            <button id="clear-offset" class="btn btn-glass offset-clear-btn">Clear</button>
+                        </div>
+                    </div>
+                </details>
+            </div>
+
+        </footer>
+
+        <!-- Toast notifications -->
+        <div id="toast-container"></div>
+    </div>
+
+    <!-- Scripts: room-ui.js runs first (regular), initializes window.uiState.
+         room.js runs second (module/deferred), accesses uiState safely. -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/room-ui.js"></script>
+    <script type="module" src="/room.js"></script>
+</body>
+</html>

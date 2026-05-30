@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyncTogether — Watch Together, Anywhere</title>
+    <meta name="description" content="Watch local videos together in perfect sync. No uploads, no streaming — just synchronized playback.">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/index.css">
+</head>
+<body>
+    <div class="landing-shell">
+        <div class="ambient-bg" aria-hidden="true"></div>
+
+        <div class="landing-content">
+            <div class="landing-brand">
+                <div class="landing-logo" aria-hidden="true">🎬</div>
+                <h1 class="landing-title">SyncTogether</h1>
+                <p class="landing-subtitle">Watch together, anywhere</p>
+            </div>
+
+            <div class="landing-card">
+                <div class="form-group">
+                    <label class="form-label" for="user-name">Your Name</label>
+                    <input type="text" id="user-name" class="form-input" placeholder="Enter your name">
+                </div>
+
+                <button id="create-room" class="btn-primary">Create Room</button>
+
+                <div class="divider"><span>or join a room</span></div>
+
+                <div class="form-group">
+                    <label class="form-label" for="room-id">Room Code</label>
+                    <input type="text" id="room-id" class="form-input" placeholder="Enter room code">
+                </div>
+
+                <button id="join-room" class="btn-secondary">Join Room</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="module" src="/main.js"></script>
+</body>
+</html>
