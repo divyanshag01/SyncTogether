@@ -195,9 +195,11 @@ clearOffsetBtn.addEventListener("click",()=>{
     socket.emit("update-offset",{roomId,offset:0});
     showToast("Offset cleared");
 });
-
-
 initializeVideoSync(
     socket,
     roomId
 );
+// keeping render session alive
+setInterval(() => {
+    fetch('/ping').catch(() => {});
+}, 2 * 60 * 1000);

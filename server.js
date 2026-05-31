@@ -12,6 +12,9 @@ app.use(express.static(path.join(__dirname,"public")));
 app.get("/watch/:roomId",(req,res)=>{
     res.sendFile(path.join(__dirname,"public","room.html"));
 });
+app.get("/ping",(req,res)=>{
+    res.status(200).send("pong");
+})
 const PORT = process.env.PORT || 8080;
 const server = http.createServer(app);
 const io = socketio(server);
@@ -283,6 +286,9 @@ io.on("connection", (socket)=>{
             return;
         }
         const checkUser = rooms[roomId].users.find(u=> u.socketId === socket.id);
+        if(!checkUser){
+            return;
+        }
         io.to(roomId).emit("message-received",{
             username: checkUser.username,
             message,
