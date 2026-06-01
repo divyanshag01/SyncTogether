@@ -129,11 +129,12 @@ socket.on("user-left",(message)=>{
     showToast(message);
 });
 
-
+socket.on("connect",()=>{
 socket.emit("join-room",{
     guestId,
     username,
     roomId
+});
 });
 // chat 
 sendChatBtn.addEventListener("click",()=>{
